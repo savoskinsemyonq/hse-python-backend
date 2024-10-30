@@ -1,6 +1,7 @@
 from http import HTTPStatus
 from typing import Optional
 from fastapi import FastAPI, HTTPException, Query, Body, Response
+from prometheus_client import Counter, generate_latest, REGISTRY
 
 from lecture_2.hw.shop_api.models import Cart, ItemCart, Item, CreateItem, UpdateItem
 
@@ -158,3 +159,11 @@ def delete_item(id: int):
         return {"message": "Item deleted already"}
     item.deleted = True
     return {"message": "Item deleted"}
+
+
+request_counter = Counter('requests_total', 'Total number of requests')
+
+@app.get('/metrics')
+def metrics():
+    request_counter.inc()
+    return Response(generate_latest(REGISTRY), media_type='text/plain')
