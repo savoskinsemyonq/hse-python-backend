@@ -1,0 +1,38 @@
+version: "3.12"
+
+services:
+  shop_api:
+    build:
+      context: .
+      dockerfile: shop_api/Dockerfile
+    container_name: shop_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/shop
+    working_dir: /shop
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus:/etc/prometheus/
+    ports:
+      - "9090:9090"
+    restart: always
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_storage:/var/lib/grafana
+    depends_on:
+      - prometheus
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+
+volumes:
+  grafana_storage:
